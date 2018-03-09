@@ -157,13 +157,13 @@ class UserController extends Controller
      *     "userId"="\d+"
      * })
      *
+     * @param SerializerInterface $serializer
      * @param Request $request
      * @param $userId
-     *
      * @return JsonResponse
      */
-    public function updateUserById(Request $request, $userId) {
-        $params = json_decode( $request->getContent() );
+    public function updateUserById(SerializerInterface $serializer, Request $request, $userId) {
+        $params = $request->getContent();
 
         $entityManager = $this->getDoctrine()->getManager();
         $repository = $entityManager->getRepository(User::class);
@@ -176,12 +176,9 @@ class UserController extends Controller
             ], 404);
         }
 
-        if ( isset($params->firstName) ) {
-            $user->setFirstName($params->firstName);
-        }
-        if ( isset($params->lastName) ) {
-            $user->setLastName($params->lastName);
-        }
+        $serializer->deserialize($params, User::class, 'json', [
+            'object_to_populate' => $user
+        ]);
 
         try {
             $entityManager->flush();

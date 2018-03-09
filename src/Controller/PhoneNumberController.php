@@ -51,28 +51,28 @@ class PhoneNumberController extends Controller
      *     "numberId"="\d+"
      * })
      *
+     * @param SerializerInterface $serializer
      * @param Request $request
      * @param $numberId
-     *
      * @return JsonResponse
      */
-    public function updateNumberById(Request $request, $numberId) {
-        $params = json_decode( $request->getContent() );
-
-        $number = $params->number;
+    public function updateNumberById(SerializerInterface $serializer, Request $request, $numberId) {
+        $params = $request->getContent();
 
         $entityManager = $this->getDoctrine()->getManager();
         $repository = $entityManager->getRepository(PhoneNumber::class);
 
         $phoneNumber = $repository->find($numberId);
-        if ( is_null($number) ) {
+        if ( is_null($phoneNumber) ) {
             return $this->json([
                 'success' => false,
                 'message' => "Phone number with id => $numberId does not exist"
             ], 404);
         }
 
-        $phoneNumber->setNumber($number);
+        $serializer->deserialize($params, PhoneNumber::class, 'json', [
+            'object_to_populate' => $phoneNumber
+        ]);
 
         try {
             $entityManager->flush();
