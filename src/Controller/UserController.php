@@ -13,6 +13,7 @@ use App\Entity\User;
 use Doctrine\ORM\ORMException;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -62,19 +63,23 @@ class UserController extends Controller
      * @Route("/api/users", methods={"GET"})
      *
      * @param SerializerInterface $serializer
-     * @return JsonResponse
+     * @return Response
      */
     public function getAllUsers(SerializerInterface $serializer) {
         $repository = $this->getDoctrine()->getRepository(User::class);
 
         $users = $repository->findAll();
 
-        return $this->json([
+        $response = $serializer->serialize([
             'success' => true,
             'data' => [
-                'users' => json_decode($serializer->serialize($users, 'json'), true)
+                'users' => $users
             ]
-        ], 200);
+        ], 'json');
+
+        return new Response($response,200, [
+            'Content-Type' => 'application/json'
+        ]);
     }
 
     /**
@@ -84,7 +89,7 @@ class UserController extends Controller
      *
      * @param SerializerInterface $serializer
      * @param $userId
-     * @return JsonResponse
+     * @return JsonResponse|Response
      */
     public function getUserById(SerializerInterface $serializer, $userId) {
         $repository = $this->getDoctrine()->getRepository(User::class);
@@ -98,12 +103,16 @@ class UserController extends Controller
             ], 404);
         }
 
-        return $this->json([
+        $response = $serializer->serialize([
             'success' => true,
             'data' => [
-                'user' => json_decode($serializer->serialize($user, 'json'), true)
+                'user' => $user
             ]
-        ], 200);
+        ], 'json');
+
+        return new Response($response, 200, [
+            'Content-Type' => 'application/json'
+        ]);
     }
 
     /**
@@ -244,19 +253,23 @@ class UserController extends Controller
      *
      * @param SerializerInterface $serializer
      * @param $userId
-     * @return JsonResponse
+     * @return Response
      */
     public function getUserPhoneNumbers(SerializerInterface $serializer, $userId) {
         $repository = $this->getDoctrine()->getRepository(PhoneNumber::class);
 
         $numbers = $repository->findByUserId($userId);
 
-        return $this->json([
+        $response = $serializer->serialize([
             'success' => true,
             'data' => [
-                'numbers' => json_decode($serializer->serialize($numbers, 'json'), true)
+                'numbers' => $numbers
             ]
-        ], 200);
+        ], 'json');
+
+        return new Response($response, 200, [
+            'Content-Type' => 'application/json'
+        ]);
     }
 
     /**
