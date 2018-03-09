@@ -6,6 +6,7 @@ use App\Entity\PhoneNumber;
 use Doctrine\ORM\ORMException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -19,7 +20,7 @@ class PhoneNumberController extends Controller
      *
      * @param SerializerInterface $serializer
      * @param $numberId
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @return JsonResponse|Response
      */
     public function getNumberById(SerializerInterface $serializer, $numberId) {
         $repository = $this->getDoctrine()->getRepository(PhoneNumber::class);
@@ -32,12 +33,16 @@ class PhoneNumberController extends Controller
             ], 404);
         }
 
-        return $this->json([
+        $response = $serializer->serialize([
             'success' => true,
             'data' => [
-                'phoneNumber' => json_decode($serializer->serialize($number, 'json'), true)
+                'phoneNumber' => $number
             ]
-        ], 200);
+        ], 'json');
+
+        return new Response($response, 200, [
+           'Content-Type' => 'application/json'
+        ]);
     }
 
 
