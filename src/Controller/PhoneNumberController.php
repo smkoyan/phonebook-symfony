@@ -38,7 +38,12 @@ class PhoneNumberController extends Controller
             'data' => [
                 'phoneNumber' => $number
             ]
-        ], 'json');
+        ], 'json', [
+            'attributes' => [
+                'id',
+                'number'
+            ]
+        ]);
 
         return new Response($response, 200, [
            'Content-Type' => 'application/json'
